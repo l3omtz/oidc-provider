@@ -10,7 +10,7 @@ import svgr from '@svgr/rollup'
 import pkg from './package.json'
 
 export default {
-  input: 'src/index.tsx',
+  input: 'src/index.ts',
   output: [
     {
       file: pkg.main,
@@ -37,6 +37,15 @@ export default {
       rollupCommonJSResolveHack: true,
       clean: true
     }),
-    commonjs()
+    commonjs({
+      namedExports: {
+          'oidc-client': [
+            'Log',
+            'UserManager',
+            'UserManagerSettings',
+            'WebStorageStateStore'
+          ]
+      }
+    })
   ]
 }
