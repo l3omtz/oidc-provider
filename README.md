@@ -15,12 +15,14 @@ npm install --save oidc-provider
 ```tsx
 import * as React from 'react'
 
-import MyComponent from 'oidc-provider'
+import { AuthProvider } from 'oidc-provider'
 
 class Example extends React.Component {
   render () {
     return (
-      <MyComponent />
+      <AuthProvider authConfig={authConfig}>
+        <BrowserRouter children={Routes} basename={"/"} />
+    </AuthProvider>
     )
   }
 }
