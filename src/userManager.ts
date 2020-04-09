@@ -1,13 +1,18 @@
-import { UserManager, WebStorageStateStore, Log, UserManagerSettings } from "oidc-client";
+import { UserManager, WebStorageStateStore, Log, UserManagerSettings, User } from "oidc-client";
 
 export default class UserManagerClient {
     UserManager: UserManager;
+    authority: string | undefined;
+    client_id: string | undefined;
 
     constructor(oidcConfig: UserManagerSettings) {
         this.UserManager = new UserManager({
             ...oidcConfig,
-            userStore: new WebStorageStateStore({ store: window.sessionStorage }),
+            userStore: new WebStorageStateStore({ store: window.sessionStorage })
         });
+        this.authority = oidcConfig.authority;
+        this.client_id = oidcConfig.client_id;
+
         // Logger
         Log.logger = console;
         Log.level = Log.DEBUG;
@@ -27,13 +32,6 @@ export default class UserManagerClient {
         });
     }
 
-    signinRedirectCallback = () => {
-        this.UserManager.signinRedirectCallback().then(() => {
-            "";
-        });
-    };
-
-
     getUser = async () => {
         const user = await this.UserManager.getUser();
         if (!user) {
@@ -48,24 +46,20 @@ export default class UserManagerClient {
         return JSON.parse(window.atob(base64));
     };
 
-
-    signinRedirect = () => {
-        localStorage.setItem("redirectUri", window.location.pathname);
-        this.UserManager.signinRedirect({});
-    };
-
-
     navigateToScreen = () => {
         window.location.replace("/en/dashboard");
     };
 
 
     isAuthenticated = () => {
-        const oidcStorage = JSON.parse(sessionStorage.getItem(`oidc.user:${process.env.REACT_APP_AUTH_URL}:${process.env.REACT_APP_IDENTITY_CLIENT_ID}`)!)
-
+        const oidcStorage = JSON.parse(sessionStorage.getItem(`oidc.user:${this.authority!}:${this.client_id}`)!)
+        console.log('has oidc storage: ', oidcStorage)
         return (!!oidcStorage && !!oidcStorage.access_token)
     };
 
+    signinSilentCallback = () => {
+        this.UserManager.signinSilentCallback();
+    };
     signinSilent = () => {
         this.UserManager.signinSilent()
             .then((user) => {
@@ -75,9 +69,16 @@ export default class UserManagerClient {
                 console.log(err);
             });
     };
-    signinSilentCallback = () => {
-        this.UserManager.signinSilentCallback();
+    signinRedirectCallback = (): Promise<User> => {
+        return this.UserManager.signinRedirectCallback()
     };
+    signinRedirect = () => {
+        localStorage.setItem("redirectUri", window.location.pathname);
+        this.UserManager.signinRedirect({});
+    };
+    signinCallback = () => {
+        return this.UserManager.signinCallback()
+    }
 
     createSigninRequest = () => {
         return this.UserManager.createSigninRequest();

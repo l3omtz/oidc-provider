@@ -1,4 +1,5 @@
 import * as React from 'react';
+// import { User } from "oidc-client";
 
 export const AuthContext = React.createContext({
     signinRedirectCallback: () => ({}),
@@ -7,5 +8,6 @@ export const AuthContext = React.createContext({
     isAuthenticated: () => ({}),
     signinRedirect: () => ({}),
     signinSilentCallback: () => ({}),
-    createSigninRequest: () => ({})
+    createSigninRequest: () => ({}),
+    signinCallback: () => ({})
 });
